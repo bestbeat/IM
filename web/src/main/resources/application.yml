@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: IMWeb
+  security:
+    user:
+      name: zqq
+      password: 123
+      roles: ADMIN
+server:
+  port: 8080
+
+
+
+
+
+
