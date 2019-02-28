@@ -27,4 +27,9 @@ public class LoginController {
     public String getRedisCache(){
         return (String) stringRedisTemplate.opsForHash().get("testRedis","id");
     }
+
+    @RequestMapping("/sss")
+    public String getRedisCache1(){
+        return "sss";
+    }
 }
