@@ -1,14 +1,15 @@
-package com.bestbeat.web.configuration;
+package com.bestbeat.web.configuration.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author bestbeat
@@ -32,23 +33,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
                 .permitAll();
     }
 
-
     @Bean
-    public UsernamePasswordAuthenticationFilter authenticationFilter(@Autowired AuthenticationManager authenticationManager){
-        UsernamePasswordAuthenticationFilter authenticationFilter = new UsernamePasswordAuthenticationFilter();
-        authenticationFilter.setAuthenticationManager(authenticationManager);
-        return authenticationFilter;
-    }
-
-    @Bean
-    public UserDetailsService myUserDetailsService() {
-        return new MyUserDetailsService();
-    }
-
-
-    @Bean
-    public AuthenticationManager myAuthenticationManager(){
-        return new MyAuthenticationManager();
+    public ProviderManager myAuthenticationManager(){
+        List<AuthenticationProvider> providerList = new ArrayList<>();
+        providerList.add(new MyAuthenticationProvider());
+        ProviderManager providerManager = new ProviderManager(providerList,new MyAuthenticationManager());
+        return providerManager;
     }
 
 }

@@ -1,10 +1,11 @@
-package com.bestbeat.web.configuration;
+package com.bestbeat.web.configuration.security;
 
 import com.bestbeat.web.model.User;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 
 /**
  * @author bestbeat
