@@ -17,14 +17,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 @Slf4j
 public class MyAuthenticationProvider implements AuthenticationProvider {
 
-    private UserDetailsService userDetailsService = new MyUserDetailsService();
+    private UserDetailsService userDetailsService;
+
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         log.info("UsernamePasswordAuthenticationProvider authentic,{},{}", authentication.getName(), authentication.getPrincipal());
         if(authentication.getPrincipal()!=null){
             UserDetails userDetails = userDetailsService.loadUserByUsername(authentication.getName());
-            if(authentication.getName().equals(userDetails.getUsername())){
+            if(authentication.getCredentials().equals(userDetails.getPassword())){
 
                 return new UsernamePasswordAuthenticationToken(authentication.getPrincipal(),authentication.getCredentials());
             }

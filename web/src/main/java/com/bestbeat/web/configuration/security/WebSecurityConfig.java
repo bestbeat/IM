@@ -1,6 +1,8 @@
 package com.bestbeat.web.configuration.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,9 +36,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
     }
 
     @Bean
-    public ProviderManager myAuthenticationManager(){
+    public ProviderManager myAuthenticationManager(@Autowired  RedisTemplate<String,Object> redisTemplate){
         List<AuthenticationProvider> providerList = new ArrayList<>();
-        providerList.add(new MyAuthenticationProvider());
+        MyAuthenticationProvider myProvider = new MyAuthenticationProvider();
+        MyUserDetailsService userDetailsService = new MyUserDetailsService();
+        userDetailsService.setRedisTemplate(redisTemplate);
+        myProvider.setUserDetailsService(userDetailsService);
+        providerList.add(myProvider);
         ProviderManager providerManager = new ProviderManager(providerList,new MyAuthenticationManager());
         return providerManager;
     }

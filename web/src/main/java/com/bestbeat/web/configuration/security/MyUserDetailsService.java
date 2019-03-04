@@ -2,10 +2,14 @@ package com.bestbeat.web.configuration.security;
 
 import com.bestbeat.web.model.User;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author bestbeat
@@ -14,17 +18,15 @@ import org.springframework.stereotype.Component;
  */
 public class MyUserDetailsService implements UserDetailsService {
 
+    private RedisTemplate<String,Object> redisTemplate;
+
+    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
 
-        RedisTemplate<String,Object> redisTemplate = new RedisTemplate<>();
-        User user = new User();
-        user.setId(1000);
-        user.setUsername("zqq");
-        user.setPassword("123");
-        redisTemplate.opsForHash().put("user","zqq",user);
-        User redisUser = (User) redisTemplate.opsForHash().get("user",s);
-        org.springframework.security.core.userdetails.User userDetails =new  org.springframework.security.core.userdetails.User(redisUser.getUsername(),redisUser.getPassword(),null);
-        return userDetails;
+        return (UserDetails) redisTemplate.opsForHash().get("user",s);
     }
 }
