@@ -1,7 +1,6 @@
 package com.bestbeat.web.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Objects;
@@ -12,8 +11,7 @@ import java.util.Set;
  * 2019/2/21 13:51
  * description:
  */
-@Getter
-@Setter
+@Data
 public class User extends org.springframework.security.core.userdetails.User {
 
     private int id;

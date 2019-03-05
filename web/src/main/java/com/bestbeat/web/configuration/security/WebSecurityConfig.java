@@ -1,17 +1,13 @@
 package com.bestbeat.web.configuration.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author bestbeat
@@ -20,6 +16,17 @@ import java.util.List;
  */
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
+
+    @Autowired
+    private UserDetailsService myUserDetailsService;
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .userDetailsService(myUserDetailsService).passwordEncoder(new BCryptPasswordEncoder())
+                ;
+
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -35,16 +42,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
                 .permitAll();
     }
 
-    @Bean
-    public ProviderManager myAuthenticationManager(@Autowired  RedisTemplate<String,Object> redisTemplate){
-        List<AuthenticationProvider> providerList = new ArrayList<>();
-        MyAuthenticationProvider myProvider = new MyAuthenticationProvider();
-        MyUserDetailsService userDetailsService = new MyUserDetailsService();
-        userDetailsService.setRedisTemplate(redisTemplate);
-        myProvider.setUserDetailsService(userDetailsService);
-        providerList.add(myProvider);
-        ProviderManager providerManager = new ProviderManager(providerList,new MyAuthenticationManager());
-        return providerManager;
-    }
 
 }
