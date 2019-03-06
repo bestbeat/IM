@@ -13,7 +13,6 @@ spring:
       shutdown-timeout: 100ms
     ssl: false
     timeout: 1000ms
-
 server:
   port: 8080
 
