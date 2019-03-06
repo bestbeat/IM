@@ -1,9 +1,9 @@
 package com.bestbeat.web.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -11,7 +11,8 @@ import java.util.Set;
  * 2019/2/21 13:51
  * description:
  */
-@Data
+@Getter
+@Setter
 public class User extends org.springframework.security.core.userdetails.User {
 
     private int id;
@@ -25,18 +26,4 @@ public class User extends org.springframework.security.core.userdetails.User {
         this.id = id;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        User user = (User) o;
-        return id == user.id;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(super.hashCode(), id);
-    }
 }

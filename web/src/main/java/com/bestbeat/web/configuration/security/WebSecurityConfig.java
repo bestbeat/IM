@@ -34,14 +34,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
                 .authorizeRequests()
                 .antMatchers("/static/**").permitAll()
                 .antMatchers("/html/register.html").permitAll()
+                .antMatchers("/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/html/login.html")
+                //指定自定义form表单请求的路径
+                .loginProcessingUrl("/login")
+                .usernameParameter("account")
+                .passwordParameter("password")
 //                .failureForwardUrl("/login/error")  //使用forward的方式，能拿到具体失败的原因,并且会将错误信息以SPRING_SECURITY_LAST_EXCEPTION的key的形式将AuthenticationException对象保存到request域中
 //                .failureUrl("/login/error")  //失败重定向,拿不到具体失败的原因
-                .defaultSuccessUrl("/login/sss")
-                .permitAll();
+                .defaultSuccessUrl("/html/home.html")
+                .permitAll()
+                .and().csrf().disable();
     }
 
 
