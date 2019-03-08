@@ -14,7 +14,7 @@
             <div class="col-2"></div>
             <div class="col-8">
                 <h2>用户注册</h2>
-                <form role="form" id="register" action="/register" method="post">
+                <form role="form" id="register" action="/login/user" method="post">
                     <div class="form-group">
                         <label for="account">帐号：
                             <input type="text" class="form-control" id="account" name="account"
@@ -30,8 +30,8 @@
                         <span v-html="checkUsername"></span>
                     </div>
                     <div class="form-group">
-                        <label for="mobile_phone">手机号码：
-                            <input type="tel" class="form-control" id="mobile_phone" name="mobile_phone"
+                        <label for="mobilePhone">手机号码：
+                            <input type="tel" class="form-control" id="mobilePhone" name="mobilePhone"
                                    v-model="formData.mobilePhone.value" placeholder="11位手机号码"/>
                         </label>
                         <span v-html="checkMobilePhone"></span>
