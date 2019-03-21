@@ -20,8 +20,10 @@ public class RedisUtil {
        if(seq == null){
             redisTemplate.opsForValue().set(seqName,0);
             return 0;
+       }else{
+           redisTemplate.opsForValue().set(seqName,++seq);
+           return seq;
        }
-       return seq;
     }
 
 }

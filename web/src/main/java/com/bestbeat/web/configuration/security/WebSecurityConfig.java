@@ -43,16 +43,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
                 .loginProcessingUrl("/login/permission")
                 .usernameParameter("account")
                 .passwordParameter("password")
-//                .failureForwardUrl("/login/error")  //使用forward的方式，能拿到具体失败的原因,并且会将错误信息以SPRING_SECURITY_LAST_EXCEPTION的key的形式将AuthenticationException对象保存到request域中
-//                .failureUrl("/login/error")  //失败重定向,拿不到具体失败的原因
-//                .successForwardUrl("/login/home")
-//                .defaultSuccessUrl("/html/home.html")
+//                .failureUrl("/login/error")  //失败重定向
+                .defaultSuccessUrl("/html/home.html",true) //成功重定向,alwaysUse参数true保留defaultSuccessUrl用于重定向，false不使用defaultSuccessUrl重定向
                 .permitAll()
                 .and().csrf().disable();
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/static/**");
+        web.ignoring().antMatchers("/js/**");
+        web.ignoring().antMatchers("/css/**");
+        web.ignoring().antMatchers("/img/**");
     }
 }

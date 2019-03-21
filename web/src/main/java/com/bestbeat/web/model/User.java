@@ -16,9 +16,9 @@ import java.util.Set;
 @Data
 public class User implements UserDetails, CredentialsContainer {
 
-    private int id;
+    private Integer id;
     private String account;
-    private int mobilePhone;
+    private String mobilePhone;
 
     private String username;
     private String password;
@@ -30,10 +30,10 @@ public class User implements UserDetails, CredentialsContainer {
 
 
     public User(){
-        this(-1,null,-1,null,null,true,true,true,true,null);
+        this(-1,null,null,null,null,true,true,true,true,null);
     }
 
-    public User(int id,String account,int mobilePhone,String username,String password,boolean accountNonExpired,boolean accountNonLocked,boolean credentialsNonExpired,boolean enabled,Set<GrantedAuthority> authorities){
+    public User(Integer id,String account,String mobilePhone,String username,String password,boolean accountNonExpired,boolean accountNonLocked,boolean credentialsNonExpired,boolean enabled,Set<GrantedAuthority> authorities){
         this.id = id;
         this.account = account;
         this.mobilePhone = mobilePhone;

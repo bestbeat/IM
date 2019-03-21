@@ -6,15 +6,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * @author bestbeat
- * 2019/3/6 16:03
+ * 2019/3/20 17:59
  * description:
  */
 @Configuration
-public class WebMvcConfig implements WebMvcConfigurer {
+public class CustomWebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/static/js/");
+        registry.addResourceHandler("/img/**").addResourceLocations("classpath:/static/image/");
         registry.addResourceHandler("/html/**").addResourceLocations("classpath:/templates/");
-        registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
     }
+
 }
