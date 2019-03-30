@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * description:通过用户名查询用户对象用于验证
  */
 @Component
-public class MyUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     private RedisTemplate<String,Object> redisTemplate;
