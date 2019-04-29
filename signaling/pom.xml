@@ -8,34 +8,26 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <groupId>com.bestbeat</groupId>
-    <artifactId>web</artifactId>
+    <artifactId>signaling</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>web</name>
-    <description>web project for im project</description>
-
-    <properties>
-        <mybatis.version>2.0.0</mybatis.version>
-    </properties>
+    <name>signaling</name>
+    <description>wobsocket project for IM</description>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis-spring</artifactId>
-            <version>${mybatis.version}</version>
         </dependency>
     </dependencies>
 

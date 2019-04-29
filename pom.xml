@@ -22,6 +22,7 @@
 
     <modules>
         <module>./web</module>
+        <module>./signaling</module>
     </modules>
 
     <dependencies>
