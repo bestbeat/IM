@@ -1,4 +1,4 @@
-package com.bestbeat.signaling;
+package com.bestbeat.signaling.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

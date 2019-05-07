@@ -1,6 +1,8 @@
-package com.bestbeat.signaling;
+package com.bestbeat.signaling.model;
 
 import lombok.Data;
+
+import javax.websocket.Session;
 
 /**
  * 连接节点
@@ -18,6 +20,19 @@ public class ConnNode {
      * 节点连接ID
      */
     private String id;
+    /**
+     * ip4地址
+     */
+    private String ipv4;
+    /**
+     * ip6地址
+     */
+    private String ipv6;
+    /**
+     * websocket session
+     */
+    private Session session;
+
     /**
      * 节点目前状态
      */

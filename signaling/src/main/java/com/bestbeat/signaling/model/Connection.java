@@ -1,6 +1,9 @@
-package com.bestbeat.signaling;
+package com.bestbeat.signaling.model;
 
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 连接对象
@@ -10,9 +13,14 @@ import lombok.Data;
 public class Connection {
 
     /**
+     * 连接密钥
+     */
+    private String connKey;
+
+    /**
      * 构成连接的节点
      */
-    private ConnNode[] nodes = new ConnNode[2];
+    private List<ConnNode> nodes = new ArrayList<>();
     /**
      * 连接的状态
      */

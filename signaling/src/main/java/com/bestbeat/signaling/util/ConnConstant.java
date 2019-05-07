@@ -1,4 +1,4 @@
-package com.bestbeat.signaling;
+package com.bestbeat.signaling.util;
 
 /**
  * 连接常量

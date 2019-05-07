@@ -1,4 +1,4 @@
-package com.bestbeat.signaling;
+package com.bestbeat.signaling.model;
 
 import java.util.HashMap;
 import java.util.Map;
