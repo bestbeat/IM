@@ -2,10 +2,11 @@ package com.bestbeat.signaling;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -15,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * 信令通道
@@ -41,11 +41,11 @@ public class SignalingChannel {
      */
     private Map<String, Queue<String>> messageFor = new HashMap<>();
 
-    /**
-     * 连接会话
-     */
-//    private Session session;
 
+    @OnClose
+    public void closeConn(){
+
+    }
 
     /**
      * 发送客户端消息
@@ -53,10 +53,10 @@ public class SignalingChannel {
      * @param session
      */
     @OnMessage
-    public void sendMessage(String message,Session session){
-        Map<String,String> params = session.getPathParameters();
-        this.messageFor.get(params.get("id")).add(message);
-        session.getAsyncRemote().sendText("Saving message *** "+ message + "*** for delivery to id " + this.partner.getOtherNodeById(params.get("id")));
+    public void sendMessage(Session session,String message){
+
+        session.getAsyncRemote().sendText(message);
+
     }
 
     /**
@@ -65,12 +65,11 @@ public class SignalingChannel {
      */
     @OnOpen
     public void connect(Session session, @PathParam("key") String key) {
-//        this.session = session;
-        log.info("ddddd");
-        System.out.println("sss");
-        Map<String,String> params = session.getPathParameters();
-        if(params==null || params.get("key").isEmpty()){
-            Connection conn = this.conns.get(params.get("key"));
+        log.info("连接正在建立...");
+        if(StringUtils.isEmpty(key)){
+            session.getAsyncRemote().sendText("No recognized query key");
+        }else{
+            Connection conn = this.conns.get(key);
             if(conn ==null){
                 conn = new Connection();
                 conn.setStatus(ConnConstant.CONNECTION_NEW.constantVal);
@@ -89,6 +88,7 @@ public class SignalingChannel {
                 ObjectMapper mapper = new ObjectMapper();
                 try {
                     session.getAsyncRemote().sendText(mapper.writeValueAsString(ret));
+                    log.info("连接建立成功，另一方已加入...");
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
@@ -101,7 +101,7 @@ public class SignalingChannel {
                     this.messageFor.remove(conn.getNodes()[1]);
                 }
                 conn = new Connection();
-                this.conns.put(params.get("key"),conn);
+                this.conns.put(key,conn);
                 conn.setStatus(ConnConstant.CONNECTION_WAIT.constantVal);
                 conn.getNodes()[0] =  new ConnNode(createConnID());
                 Map<String,String> ret = new HashMap<>();
@@ -110,12 +110,11 @@ public class SignalingChannel {
                 ObjectMapper mapper = new ObjectMapper();
                 try {
                     session.getAsyncRemote().sendText(mapper.writeValueAsString(ret));
+                    log.info("连接建立成功，等待另一个加入...");
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
             }
-        }else{
-            session.getAsyncRemote().sendText("No recognized query key");
         }
     }
 
