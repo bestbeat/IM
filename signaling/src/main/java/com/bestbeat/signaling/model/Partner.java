@@ -12,15 +12,18 @@ public class Partner {
     /**
      * 节点映射表
      */
-    private Map<String,ConnNode> nodeTable = new HashMap<>();
+    private Map<String, Endpoint> nodeTable = new HashMap<>();
 
     /**
      * 根据提供节点，删除对应映射
      * @param thisNode
      * @return
      */
-    public ConnNode delConnNodeMap(ConnNode thisNode){
-       return nodeTable.remove(thisNode.getId());
+    public void delConnNodeMap(Endpoint thisNode){
+        Endpoint otherNode = nodeTable.remove(thisNode.getId());
+        if (otherNode != null) {
+            nodeTable.remove(otherNode.getId());
+        }
     }
 
     /**
@@ -28,7 +31,7 @@ public class Partner {
      * @param id
      * @return
      */
-    public ConnNode getOtherNodeById(String id){
+    public Endpoint getOtherNodeById(String id){
         return  nodeTable.get(id);
     }
 
@@ -37,7 +40,7 @@ public class Partner {
      * @param thisNode
      * @return
      */
-    public ConnNode getOtherNode(ConnNode thisNode){
+    public Endpoint getOtherNode(Endpoint thisNode){
         return  getOtherNodeById(thisNode.getId());
     }
 
@@ -46,7 +49,7 @@ public class Partner {
      * @param firstNode
      * @param secondNode
      */
-    public void addConnNodeMap(ConnNode firstNode,ConnNode secondNode){
+    public void addConnNodeMap(Endpoint firstNode, Endpoint secondNode){
         nodeTable.put(firstNode.getId(),secondNode);
         nodeTable.put(secondNode.getId(),firstNode);
     }

@@ -20,7 +20,7 @@ public class Connection {
     /**
      * 构成连接的节点
      */
-    private List<ConnNode> nodes = new ArrayList<>();
+    private List<Endpoint> nodes = new ArrayList<>();
     /**
      * 连接的状态
      */
