@@ -1,6 +1,5 @@
 package com.bestbeat.signaling.model;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +36,7 @@ public class Endpoint {
 
     @OnClose
     public void onClose(){
+        log.info("999");
         EndpointManager.getInstance().getEndpoints().remove(this);
     }
 
@@ -61,10 +61,6 @@ public class Endpoint {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Partner partner = EndpointManager.getInstance().getPartner();
-        Endpoint other = partner.getOtherNode(this);
-        other.getSession().getAsyncRemote().sendText(message);
     }
 
     /**

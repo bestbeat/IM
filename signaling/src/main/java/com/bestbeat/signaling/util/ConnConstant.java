@@ -7,17 +7,21 @@ package com.bestbeat.signaling.util;
 public enum ConnConstant {
 
     /**
+     * 连接关闭
+     */
+    CONN_CLOSE("close"),
+    /**
      * 连接等待
      */
-    CONNECTION_WAIT("waiting"),
+    CONN_WAIT("waiting"),
     /**
      * 连接成功
      */
-    CONNECTION_SUCCESS("connected"),
+    CONN_SUCCESS("connected"),
     /**
      * 新建连接
      */
-    CONNECTION_NEW("new")
+    CONN_NEW("new")
     ;
 
     public String constantVal;
