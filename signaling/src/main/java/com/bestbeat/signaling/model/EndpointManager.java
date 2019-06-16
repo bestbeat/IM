@@ -49,6 +49,7 @@ public class EndpointManager {
     public synchronized void send(Endpoint endpoint,String msg) {
         Endpoint other = this.partner.getOtherNode(endpoint);
         other.getSession().getAsyncRemote().sendText(msg);
+        endpoint.getSession().getAsyncRemote().sendText(msg);
     }
 
     /**
