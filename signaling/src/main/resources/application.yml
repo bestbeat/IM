@@ -3,3 +3,5 @@ spring:
     cache:
       cachecontrol:
         no-cache: true
+server:
+  port: 8443

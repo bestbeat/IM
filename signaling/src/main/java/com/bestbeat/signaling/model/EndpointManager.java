@@ -1,6 +1,6 @@
 package com.bestbeat.signaling.model;
 
-import com.bestbeat.signaling.util.ConnConstant;
+import com.bestbeat.signaling.util.MessageType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -31,145 +31,131 @@ public class EndpointManager {
         return endpointManager;
     }
 
-    /**
-     * 节点注册表
-     */
-    private CopyOnWriteArraySet<Endpoint> endpoints = new CopyOnWriteArraySet<>();
 
     /**
-     * 连接表
+     * 房间表
      */
-    private Map<String,Connection> conns = new HashMap<>();
+    private Map<String,Set<Endpoint>> rooms = new HashMap<>();
+
 
     /**
-     * 连接节点映射表
+     * 根据房间号发送消息
+     * @param o_message
      */
-    private Partner partner = new Partner();
+    public synchronized void send(Map<String,Object> o_message) {
 
-    public synchronized void send(Endpoint endpoint,String msg) {
-        Endpoint other = this.partner.getOtherNode(endpoint);
-        other.getSession().getAsyncRemote().sendText(msg);
-        endpoint.getSession().getAsyncRemote().sendText(msg);
+        String roomId = (String) o_message.get("roomId");
+        ObjectMapper jsonObject = new ObjectMapper();
+        Set<Endpoint> room = rooms.get(roomId);
+        for (Endpoint peer : room) {
+            try {
+                if (peer.getUuid().toString().equals(o_message.get("to"))) {
+                    peer.getSession().getAsyncRemote().sendText(jsonObject.writeValueAsString(o_message));
+                    break;
+                } else if ("all".equals(o_message.get("to"))) {
+
+                    peer.getSession().getAsyncRemote().sendText(jsonObject.writeValueAsString(o_message));
+
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     /**
      * 关闭连接
      * @param endpoint
      */
-    public synchronized void close(Endpoint endpoint,String secretKey){
+    public synchronized void close(Endpoint endpoint,Map<String,Object> o_message){
 
-        this.partner.delConnNodeMap(endpoint);
+        ObjectMapper jsonObject = new ObjectMapper();
+        String roomId = endpoint.getRoomId();
+        o_message.put("from",endpoint.getUuid().toString());
 
-        if (StringUtils.isEmpty(secretKey)) {
-            throw new RuntimeException("The secretKey can not be empty");
+        if (StringUtils.isEmpty(roomId)) {
+            log.info("The roomId can not be empty");
+            return;
         }
 
-        if (!this.conns.containsKey(secretKey)) {
-            throw new RuntimeException("Not Found Connetion of the secretKey mapper");
+        if (!this.rooms.containsKey(roomId)) {
+            log.info("Not Found roomId ");
+            return;
         }
 
-        Connection conn = this.conns.get(secretKey);
-        if (conn == null) {
-            this.conns.remove(secretKey);
+        Set<Endpoint> room = this.rooms.get(roomId);
+        if (room == null) {
+            this.rooms.remove(roomId);
         } else {
-            Map<String,Object> sendMap = new HashMap<>();
-            ObjectMapper objectMapper = new ObjectMapper();
-            if (conn.getStatus().equals(ConnConstant.CONN_SUCCESS.constantVal)) {
-                Iterator<Endpoint> it = conn.getNodes().iterator();
-                while (it.hasNext()){
-                    Endpoint p = it.next();
-                    if (p.getId().equals(endpoint.getId())) {
-                        sendMap.put("method","close");
-                        sendMap.put("status",ConnConstant.CONN_WAIT.constantVal);
-                        try {
-                            p.getSession().getAsyncRemote().sendText(objectMapper.writeValueAsString(sendMap));
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
-                        it.remove();
-                        conn.setStatus(ConnConstant.CONN_WAIT.constantVal);
-                        break;
-                    }
-                }
-            } else {
-                sendMap.put("method","close");
-                sendMap.put("status",ConnConstant.CONN_CLOSE.constantVal);
+
+            room.remove(endpoint);
+
+            for (Endpoint peer : room) {
                 try {
-                    this.conns.get(secretKey).getNodes().get(0).getSession().getAsyncRemote().sendText(objectMapper.writeValueAsString(sendMap));
+                    peer.getSession().getAsyncRemote().sendText(jsonObject.writeValueAsString(o_message));
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
-                this.conns.remove(secretKey);
             }
+
         }
 
     }
 
-    public synchronized void connect(Endpoint endpoint,String secretKey) throws JsonProcessingException {
+    /**
+     * 连接信令服务器
+     * 并加入房间
+     * @param endpoint
+     */
+    public synchronized void connect(Endpoint endpoint) {
 
-        if (StringUtils.isEmpty(secretKey)) {
-            throw new RuntimeException("The secretKey can not be empty");
-        }
-        Connection conn = this.conns.get(secretKey);
-        if (conn == null) {
-            conn = new Connection();
-            conn.setConnKey(secretKey);
-            conn.setStatus(ConnConstant.CONN_NEW.constantVal);
-            this.conns.put(secretKey,conn);
+        if (StringUtils.isEmpty(endpoint.getRoomId())) {
+            log.info("The roomId can not be empty");
+            return;
         }
 
-        Map<String,Object> sendMap = new HashMap<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        if (conn.getStatus().equals(ConnConstant.CONN_WAIT.constantVal)) {
-            conn.getNodes().add(endpoint);
-            partner.addConnNodeMap(conn.getNodes().get(0),endpoint);
-            conn.setStatus(ConnConstant.CONN_SUCCESS.constantVal);
-            sendMap.put("method","connect");
-            sendMap.put("status",ConnConstant.CONN_SUCCESS.constantVal);
-            for (Endpoint p : conn.getNodes()) {
-                p.getSession().getAsyncRemote().sendText(objectMapper.writeValueAsString(sendMap));
-            }
-        } else {
-            if (conn.getStatus().equals(ConnConstant.CONN_SUCCESS.constantVal)) {
-                this.partner.delConnNodeMap(endpoint);
-            }
-            conn.getNodes().add(endpoint);
-            conn.setStatus(ConnConstant.CONN_WAIT.constantVal);
-            sendMap.put("method","connect");
-            sendMap.put("status",ConnConstant.CONN_WAIT.constantVal);
+        if (!this.rooms.containsKey(endpoint.getRoomId())) {
+            Set<Endpoint> room = new CopyOnWriteArraySet<>();
+            this.rooms.put(endpoint.getRoomId(),room);
+        }
+
+        Set<Endpoint> room = this.rooms.get(endpoint.getRoomId());
+        Map<String,Object> sendContent = new HashMap<>();
+        ObjectMapper jsonObject = new ObjectMapper();
+        if (room.size() > 4) {
+            sendContent.put("type", MessageType.SIGNALING_CONNECT_ERROR);
+            sendContent.put("from",endpoint.getUuid().toString());
+            sendContent.put("to",endpoint.getUuid().toString());
+            sendContent.put("roomId",endpoint.getRoomId());
+            sendContent.put("content","连接数量已达最大");
             try {
-                endpoint.getSession().getAsyncRemote().sendText(objectMapper.writeValueAsString(sendMap));
+                endpoint.getSession().getAsyncRemote().sendText(jsonObject.writeValueAsString(sendContent));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
+            return;
         }
-    }
+        room.add(endpoint);
 
-    /**
-     * 与WebSocket 服务器建立连接,注册
-     * @param endpoint
-     */
-    public synchronized void register(Endpoint endpoint){
-        endpoint.setId(createConnID());
-        endpoints.add(endpoint);
-        Map<String,Object> sendMap = new HashMap<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        sendMap.put("method","register");
-        sendMap.put("id",endpoint.getId());
-        try {
-            endpoint.getSession().getAsyncRemote().sendText(objectMapper.writeValueAsString(sendMap));
-            log.info("浏览器与服务器建立连接完成，节点ID: {}",endpoint.getId());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        log.debug("已经加入{}房间",endpoint.getRoomId());
+
+        sendContent.put("type", MessageType.SIGNALING_CONNECT.name());
+        sendContent.put("from",endpoint.getUuid().toString());
+        sendContent.put("to","all");
+        sendContent.put("roomId",endpoint.getRoomId());
+        sendContent.put("content",null);
+
+        for (Endpoint peer : room) {
+
+            try {
+                peer.getSession().getAsyncRemote().sendText(jsonObject.writeValueAsString(sendContent));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
         }
 
     }
 
-    /**
-     * 获取新节点ID
-     * @return
-     */
-    private  String createConnID() {
-        return String.valueOf(Math.floor(Math.random()*1000000000));
-    }
 }

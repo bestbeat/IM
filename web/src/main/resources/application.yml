@@ -1,18 +1,13 @@
 spring:
   application:
     name: IMWeb
-  redis:
-    database: 0
-    url: redis://@localhost:6379
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        max-wait: 1ms
-        min-idle: 0
-      shutdown-timeout: 100ms
-    ssl: false
-    timeout: 1000ms
+  datasource:
+    name: mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: zqq
+    password: qwer123!@#
+    url: jdbc:mysql://rm-bp1sxm1dwq4wl0b1nuo.mysql.rds.aliyuncs.com/web-db?useUnicode=true&characterEncoding=utf-8
+
 server:
   port: 8080
 
@@ -20,4 +15,9 @@ server:
 
 
 
+
+
+
+mybatis:
+  type-aliases-package: com.bestbeat.web.model
 

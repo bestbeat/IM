@@ -1,6 +1,10 @@
 package com.bestbeat.web.configuration.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -8,51 +12,74 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * @author bestbeat
+ * @author 张渠钦
  * 2019/2/19 17:05
- * description:
+ * springSecurit 配置类
  */
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
 
     @Autowired
-    private UserDetailsService myUserDetailsService;
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private AuthenticationEntryPoint authenticationEntryPoint;  //  未登陆时返回 JSON 格式的数据给前端（否则为 html）
+
+    @Autowired
+    private AuthenticationSuccessHandler authenticationSuccessHandler;  // 登录成功返回的 JSON 格式数据给前端（否则为 html）
+
+    @Autowired
+    private AuthenticationFailureHandler authenticationFailureHandler;  //  登录失败返回的 JSON 格式数据给前端（否则为 html）
+
+//    @Autowired
+//    private LogoutSuccessHandler logoutSuccessHandler;  // 注销成功返回的 JSON 格式数据给前端（否则为 登录时的 html）
+
+    @Autowired
+    private AccessDeniedHandler accessDeniedHandler;
+
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(myUserDetailsService).passwordEncoder(new BCryptPasswordEncoder())
-                ;
-
+        auth.userDetailsService(userDetailsService);
+        auth.authenticationProvider(authenticationProvider);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
+        http.csrf().disable()
+                .httpBasic().authenticationEntryPoint(authenticationEntryPoint)
+                .and()
                 .authorizeRequests()
-                .antMatchers("/html/register.html").permitAll()
-                .antMatchers("/login/user").permitAll()
-                .anyRequest().authenticated()
+                .antMatchers("/backend/login/user").permitAll()
+                .anyRequest()
+                .authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/html/login.html")
-                //指定自定义form表单请求的路径
-                .loginProcessingUrl("/login/permission")
-                .usernameParameter("account")
+                .successHandler(authenticationSuccessHandler)
+                .failureHandler(authenticationFailureHandler)
+                .loginProcessingUrl("/backend/login/permission")
+                .usernameParameter("loginName")
                 .passwordParameter("password")
-//                .failureUrl("/login/error")  //失败重定向
-                .defaultSuccessUrl("/html/home.html",true) //成功重定向,alwaysUse参数true保留defaultSuccessUrl用于重定向，false不使用defaultSuccessUrl重定向
-                .permitAll()
-                .and().csrf().disable();
+
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler);
+
     }
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/js/**");
-        web.ignoring().antMatchers("/css/**");
-        web.ignoring().antMatchers("/img/**");
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

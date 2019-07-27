@@ -1,20 +1,25 @@
 package com.bestbeat.signaling.model;
 
+import com.bestbeat.signaling.util.MessageType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.websocket.*;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 信令通道
  * @author zhangqq
  */
-@ServerEndpoint("/signaling")
+@ServerEndpoint("/signaling/{roomId}")
 @Component
 @Slf4j
 @Data
@@ -29,15 +34,31 @@ public class Endpoint {
      */
     private Session session;
 
+    /**
+     * UUID
+     */
+    private UUID uuid;
+
+    /**
+     * 房间号，每个用户只能进入一个房间
+     */
+    private String roomId;
+
     @OnError
     public  void onError(Throwable e){
-
+        log.info(e.getMessage());
     }
 
     @OnClose
     public void onClose(){
-        log.info("999");
-        EndpointManager.getInstance().getEndpoints().remove(this);
+        log.info("websocket close");
+        Map<String,Object> msg = new HashMap<>();
+        msg.put("type",MessageType.SIGNALING_CLOSE.name());
+        msg.put("from",this.getId());
+        msg.put("to","all");
+        msg.put("roomId",this.getRoomId());
+        msg.put("content","");
+        EndpointManager.getInstance().close(this,msg);
     }
 
     /**
@@ -46,18 +67,23 @@ public class Endpoint {
      */
     @OnMessage
     public void onMessage(String message){
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper jsonObject = new ObjectMapper();
         EndpointManager manager = EndpointManager.getInstance();
+        if (StringUtils.isEmpty(message)) {
+            log.info("The message is null");
+            return;
+        }
         try {
-            Map<String,String> msg= om.readValue(message,Map.class);
-            String method = msg.get("method");
-            String secretKey = msg.get("secretKey");
-            String content = msg.get("content");
-            switch (method) {
-                case "connect": manager.connect(this,secretKey);break;
-                case "close": manager.close(this,secretKey);break;
-                default:manager.send(this,content);
+            Map<String,Object> msg= jsonObject.readValue(message,Map.class);
+            String type = (String) msg.get("type");
+            if (MessageType.HEART_BEAT.name().equals(type)) {
+
+            } else if (MessageType.SIGNALING_CLOSE.name().equals(type)) {
+                manager.close(this,msg);
+            } else {
+                manager.send(msg);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,9 +94,11 @@ public class Endpoint {
      * @param session
      */
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session, @PathParam("roomId") String roomId) {
         this.session=session;
-        EndpointManager.getInstance().register(this);
+        this.roomId = roomId;
+        this.uuid = UUID.randomUUID();
+        EndpointManager.getInstance().connect(this);
     }
 
 }

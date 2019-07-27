@@ -5,18 +5,21 @@ import com.bestbeat.web.service.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Map;
+
 
 /**
- * @author  bestbeat
- * 2019/2/18 17:20
- * description:
+ * @author  张渠钦
+ * 2019/2/18
+ * 登录controller层
  */
 @Controller
-@RequestMapping("/login")
+@RequestMapping("/backend/login")
 @Slf4j
 public class LoginController {
 
@@ -25,7 +28,7 @@ public class LoginController {
 
     @RequestMapping(value = "/user",method = RequestMethod.POST)
     @ResponseBody
-    public boolean registerUser(User user){
+    public boolean registerUser(@RequestBody User user){
         log.info("{}",user);
         return loginService.registerUser(user);
     }
