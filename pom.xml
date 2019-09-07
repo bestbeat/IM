@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.2.RELEASE</version>
+        <version>2.1.7.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.bestbeat</groupId>
@@ -17,8 +17,6 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <logback-version>1.2.3</logback-version>
-        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
     </properties>
 
     <modules>
@@ -38,46 +36,47 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.16</version>
-        </dependency>
-        <!--<dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>aliyun-java-sdk-rds</artifactId>
-            <version>2.3.7</version>
-        </dependency>-->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
-            <version>2.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.58</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback-version}</version>
-        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <!-- 如果引用的依赖本来就没有版本号，
+             就像springboot starter 模块由父模块版本决定之类的，
+             就不需要在dependencyManagement 声明，
+             直接在子模块中引用即可。
+             意思就是，这里声明的依赖都是需要<version>标签的-->
+        <!-- dependencyManagement 只是统一管理版本号，不会立急引用需要子模块显示引用但不需要版本号只需<groupId>和<artifactId>
+             当子模块添加版本号后会引用子模块自己定义的
+             dependencies 当引用后maven 会立马加载，并且被子模块继承引用-->
+        <!-- 注意：springboot 下的 starter模块不需要在这里引用并且版本号也不需要，因为parent中已经定义了版本号
+             第三方的starter模块可以在这里引用并且需要版本号-->
+        <dependencies>
+            <!-- 由于各个Spring Data模块的初始日期不同，因此大多数模块都带有不同的主要版本号和次要版本号。
+           依赖Spring Data Release Train BOM 为找到兼容版本。 -->
+            <!--<dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-releasetrain</artifactId>
+                <version>Lovelace-SR10</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>2.6.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.58</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 
     <build>
         <plugins>

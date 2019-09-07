@@ -7,7 +7,6 @@ import com.bestbeat.web.utils.IdUtils;
 import com.bestbeat.web.utils.enumeration.RoleEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +36,8 @@ public class LoginService {
         user.setRoleSet(roleSet);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setUserId(IdUtils.createUserId());
-        userMapper.addUser(user);
-        userMapper.addUserRole(user);
+//        userMapper.addUser(user);
+//        userMapper.addUserRole(user);
         return true;
     }
 

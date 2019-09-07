@@ -3,6 +3,9 @@ package com.bestbeat.web;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
+/**
+ * @author bestbeat
+ */
 public class ServletInitializer extends SpringBootServletInitializer {
 
     @Override
