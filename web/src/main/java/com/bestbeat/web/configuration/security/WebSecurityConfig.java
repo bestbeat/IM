@@ -47,7 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 .logoutUrl("")
                 .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
                 .invalidateHttpSession(true)
-                .addLogoutHandler()
+                .addLogoutHandler(null)
                 .deleteCookies("");
 
         http.csrf().disable();
